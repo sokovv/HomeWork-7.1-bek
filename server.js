@@ -58,24 +58,41 @@ app.use(koaBody({
 const tickets = new Tickets();
 
 app.use(async ctx => {
-  const { method } = ctx.request.querystring;
-  switch (method) {
-    case 'allTickets':
-      ctx.response.body = tickets.allTickets();
-      return;
-    case 'ticketById':
-      const { id } = ctx.request.query;
-      ctx.response.body = tickets.ticketById(id);
-      return;
-    case 'createTicket':
-      const { name, description } = ctx.request.body;
-      tickets.createTicket(name, description);
-      return;
-    default:
-      ctx.response.status = 404;
-      return;
+  if (ctx.request.query) {
+    const { method } = ctx.request.query
+
+    switch (method) {
+      case 'allTickets':
+        ctx.response.body = tickets.allTickets();
+        return;
+      case 'ticketById':
+        const { id } = ctx.request.query;
+        ctx.response.body = tickets.ticketById(+id);
+        return;
+      case 'deleteTicket':
+        const { idDel } = ctx.request.query;
+        tickets.deleteTicket(+idDel);
+        return;
+      case 'changeStatus':
+        const { idStat } = ctx.request.query;
+        tickets.changeStatus(+idStat);
+        return;
+    }
+    if (ctx.request.body) {
+      const { method } = ctx.request.body;
+      switch (method) {
+        case 'createTicket':
+          const { name, description } = ctx.request.body;
+          tickets.createTicket(name, description);
+          return;
+        case 'editTicket':
+          const { id, nameEdit, descriptionEdit } = ctx.request.body;
+          tickets.editTicket(+id, nameEdit, descriptionEdit);
+          return;
+      }
+    }
   }
 });
 
 
-const server = http.createServer(app.callback()).listen(7080);
+const server = http.createServer(app.callback()).listen(7060);
